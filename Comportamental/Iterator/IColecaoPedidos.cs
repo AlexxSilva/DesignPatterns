@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DesignPatterns.Comportamental.Iterator
 {
-    public interface IAgregada
+    public interface IColecaoPedidos
     {
-        IIterator CriarIterator();
+        IIteradorPedidos CriarIterador();
     }
 }

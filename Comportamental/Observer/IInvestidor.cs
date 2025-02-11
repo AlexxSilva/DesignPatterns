@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DesignPatterns.Comportamental.Iterator
+namespace DesignPatterns.Comportamental.Observer
 {
-    public interface IIterator
+    public interface IInvestidor
     {
-        bool TemProximo();
-        object Proximo();
+        void Atualizar(string simbolo, double preco);
     }
 }
