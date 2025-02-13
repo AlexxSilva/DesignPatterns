@@ -20,6 +20,14 @@ using DesignPatterns.estrutural.decorator;
 using DesignPatterns.estrutural.Facade;
 using DesignPatterns.estrutural.Flyweight;
 using DesignPatterns.estrutural.Proxy;
+using DesignPatterns.WMS.Aplicacao.Decorators;
+using DesignPatterns.WMS.Aplicacao.Factories;
+using DesignPatterns.WMS.Aplicacao.Observers;
+using DesignPatterns.WMS.Aplicacao.Services;
+using DesignPatterns.WMS.Aplicacao.Strategies;
+using DesignPatterns.WMS.Dominio.Entidades;
+using DesignPatterns.WMS.Dominio.Interfaces;
+using DesignPatterns.WMS.Infraestrutura;
 
 
 internal class Program
@@ -320,22 +328,83 @@ internal class Program
         //calculadora.DefinirOperacao(new Multiplicacao());
         //Console.WriteLine($"Multiplicação: {calculadora.ExecutarCalculo(5, 3)}");
 
-        //visitor ------------------------------------------------------------
-        List<Funcionario> funcionarios = new()
-        {
-            new Desenvolvedor("Alex", 8000, "C#"),
-            new Gerente("Jeniffer", 12000, 5)
-        };
+        ////visitor ------------------------------------------------------------
+        //List<Funcionario> funcionarios = new()
+        //{
+        //    new Desenvolvedor("Alex", 8000, "C#"),
+        //    new Gerente("Jeniffer", 12000, 5)
+        //};
 
-        var visitor = new RelatorioSalarioVisitor();
+        //var visitor = new RelatorioSalarioVisitor();
 
-        // Executando o visitor para cada funcionário
-        foreach (var funcionario in funcionarios)
-        {
-            funcionario.Aceitar(visitor);
-        }
+        //// Executando o visitor para cada funcionário
+        //foreach (var funcionario in funcionarios)
+        //{
+        //    funcionario.Aceitar(visitor);
+        //}
+
+        //-----------WMS -------------------------------------------------------
+
+        var uow = new UnitOfWork();
+        var factory = new NotaFiscalFactory();
+
+        // Configurar estratégia de endereçamento
+        var estrategia = new EstrategiaEnderecamentoFIFO(uow.Enderecos);
+        var enderecamento = new EnderecamentoService(estrategia);
+
+        // Criar serviço com decorator
+        IEstoqueService service = new EstoqueService(uow, factory, enderecamento);
+        service = new ValidacaoDadosDecorator(service);
+
+        // Registrar observadores
+        var estoqueService = (EstoqueService)service;
+        estoqueService.RegistrarObservador(new NotificadorEmail());
+        estoqueService.RegistrarObservador(new NotificadorLog());
+
+        // Popular dados iniciais
+        PopularDadosTeste(uow);
+
+        // Processar nota fiscal
+        ProcessarNotaFiscal(service);
+
+        Console.ReadKey();
+
     }
 
 
+    static void PopularDadosTeste(IUnitOfWork uow)
+    {
+        uow.Enderecos.Adicionar(new Endereco(0, "Bloco A", "P1", "N1", false));
+        uow.Enderecos.Adicionar(new Endereco(0, "Bloco B", "P2", "N2", false));
+
+        var categoria = new Categoria { Id = 1, Descricao = "Matéria Prima" };
+        uow.Produtos.Adicionar(new Produto
+        {
+            Id = 1,
+            Descricao = "Parafuso Inox",
+            Unidade = "UN",
+            QuantidadeMinima = 100
+        });
+    }
+
+    static void ProcessarNotaFiscal(IEstoqueService service)
+    {
+        try
+        {
+            var produto = service.ObterProduto(1) ?? throw new Exception("Produto não encontrado");
+
+            service.ProcessarNotaCompleta("NF-2023-001", new List<(Produto, decimal, decimal)>
+            {
+                (produto, 0.75m, 500)
+            });
+
+            Console.WriteLine("Nota fiscal processada com sucesso!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro: {ex.Message}");
+        }
+    }
+
 }
-}
+

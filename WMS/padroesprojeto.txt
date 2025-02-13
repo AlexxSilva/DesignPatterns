@@ -1,0 +1,100 @@
+﻿1. Repository Pattern
+Onde: IRepository<T>, MemoryRepository<T>
+
+Objetivo:
+
+Abstrair o acesso a dados, isolando a lógica de persistência.
+
+MemoryRepository<T> é uma implementação em memória (simulação de banco de dados).
+
+Permite trocar a implementação (ex: SQL, NoSQL) sem afetar o domínio.
+
+2. Unit of Work Pattern
+Onde: IUnitOfWork, UnitOfWork
+
+Objetivo:
+
+Coordenar transações e operações de persistência.
+
+Agrupa repositórios para garantir consistência (ex: Commit).
+
+Centraliza o controle de alterações no banco de dados.
+
+3. Factory Method Pattern
+Onde: NotaFiscalFactory
+
+Objetivo:
+
+Encapsular a criação complexa de objetos (como NotaFiscal e seus itens).
+
+Centraliza regras de construção, evitando duplicação de código.
+
+4. Service Layer Pattern
+Onde: EstoqueService
+
+Objetivo:
+
+Definir uma camada de serviços para orquestrar operações de negócio (ex: ProcessarNotaFiscal).
+
+Coordena repositórios, factories e regras de domínio.
+
+5. Dependency Injection (DI)
+Onde: Injeção de IUnitOfWork e NotaFiscalFactory em EstoqueService.
+
+Objetivo:
+
+Promove desacoplamento entre classes.
+
+Facilita testes (permite mockar dependências).
+
+Observação: Não há um container IoC, mas a DI é feita manualmente.
+
+6. Domain Model Pattern
+Onde: Entidades como Produto, NotaFiscal, Lote.
+
+Objetivo:
+
+Representar o domínio do negócio com objetos ricos em comportamento (embora neste exemplo o comportamento esteja nos serviços).
+
+Classes refletem conceitos do negócio (estoque, categorias, endereçamento).
+
+7. Value Object (DDD)
+Onde: Endereco como record.
+
+Objetivo:
+
+Representar um objeto imutável que não tem identidade própria (é definido por seus valores).
+
+Útil para agrupar atributos relacionados (ex: rua, prateleira, nível).
+
+8. In-Memory Database
+Onde: MemoryRepository<T> armazena dados em uma lista.
+
+Objetivo:
+
+Simular um banco de dados para desenvolvimento/testes sem dependências externas.
+
+9. Separation of Concerns (SoC)
+Onde: Estrutura de pastas (Dominio, Aplicacao, Infraestrutura, Presentation).
+
+Objetivo:
+
+Organizar o código em camadas com responsabilidades claras.
+
+Facilita manutenção e escalabilidade.
+
+10. Transaction Script
+Onde: Método ProcessarNotaFiscal em EstoqueService.
+
+Objetivo:
+
+Coordenar uma operação complexa (processar nota fiscal) em um único fluxo.
+
+Combina criação de nota, atualização de estoque e persistência.
+
+11. SOLID Principles
+Single Responsibility: Cada classe tem uma única responsabilidade (ex: NotaFiscalFactory cria notas).
+
+Dependency Inversion: Interfaces (IRepository, IUnitOfWork) definem contratos, não implementações.
+
+Open/Closed: Repositórios são extensíveis para novos tipos sem modificar código existente.
